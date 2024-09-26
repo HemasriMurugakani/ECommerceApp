@@ -15,7 +15,7 @@ const BackArrowIcon = ({ width = 25, height = 24, color = "#1976D2" }) => (
 
 const BottomSheet = ({ isVisible, item, onClose, onAddToOrder }) => {
   const [showAddOns, setShowAddOns] = useState(false);
-  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [selectedVariant, setSelectedVariant] = useState(item?.variants?.[0] || null);
   const [selectedAddOns, setSelectedAddOns] = useState({
     toppings: [],
     beverages: [],
@@ -47,34 +47,46 @@ const BottomSheet = ({ isVisible, item, onClose, onAddToOrder }) => {
   };
 
   const totalPrice = () => {
-    const basePrice = selectedVariant ? selectedVariant.price : item.discountedPrice;
+    // Check if a variant is selected; if not, use the first variant's price
+    const basePrice = selectedVariant ? selectedVariant.price : (item.variants?.length > 0 ? item.variants[0].price : 0);
+    
+    // Calculate the total price of selected add-ons
     const addOnsPrice = Object.values(selectedAddOns).flat().reduce((sum, addon) => sum + addon.price, 0);
-    return basePrice * quantity + addOnsPrice; 
-  };
+    
+    // Return the total price: base price times quantity plus add-ons price
+    return (basePrice * quantity) + addOnsPrice; 
+};
   const navigation = useNavigation();
  
     
-    const handleAddToOrder = () => {
-      const selectedItem = {
-          name: item.name,
-          image: item.image,
-          quantity: quantity,
-          variant: selectedVariant ? selectedVariant.name : null,
-          addOns: {
-              toppings: selectedAddOns.toppings.map(t => t.name),
-              beverages: selectedAddOns.beverages.map(b => b.name),
-          },
-          totalPrice: totalPrice().toFixed(2),
-      };
-      
-      console.log(selectedItem);
-  
-      // Navigate to CartSummaryScreen and pass the selected item
-      navigation.navigate('CartSummaryScreen', { selectedItem });
-      
-      onClose();
-  };
+  const handleAddToOrder = () => {
+    // Get the variant name and price, defaulting to the first variant if none is selected
+    const variant = selectedVariant ? selectedVariant.name : item.variants?.[0]?.name;
+    const variantPrice = selectedVariant ? selectedVariant.price : (item.variants?.[0]?.price || 0); // Use first variant price or 0 if none
 
+    const selectedItem = {
+        name: item.name,
+        image: item.image,
+        quantity: quantity,
+        variant: variant,
+        variantPrice: variantPrice,
+        addOns: {
+            toppings: selectedAddOns.toppings.map(t => t.name),
+            beverages: selectedAddOns.beverages.map(b => b.name),
+            toppingsPrice: selectedAddOns.toppings.reduce((total, tp) => total + tp.price, 0),  // Sum of all topping prices
+            beveragesPrice: selectedAddOns.beverages.reduce((total, bp) => total + bp.price, 0),  // Sum of all beverage prices
+        },
+        // totalPrice: totalPrice().toFixed(2),  // Calculate and format the total price
+    };
+
+    console.log(selectedItem);
+
+    // Navigate to CartSummaryScreen and pass the selected item
+    navigation.navigate('CartSummaryScreen', { selectedItem });
+
+    // Close the bottom sheet/modal
+    onClose();
+};
   return (
     <Modal isVisible={isVisible} style={styles.modal} onBackdropPress={onClose}>
       {item && (
@@ -126,7 +138,7 @@ const BottomSheet = ({ isVisible, item, onClose, onAddToOrder }) => {
 
                 <View style={styles.itemInfoContainer}>
                   <Image source={{ uri: item.image }} style={styles.itemImage} />
-                  <Text style={styles.itemName}>{item.name}</Text>
+                  <Text style={styles.description2}>{item.name}</Text>
                 </View>
 
                 <View style={styles.toggleContainer}>
@@ -149,25 +161,25 @@ const BottomSheet = ({ isVisible, item, onClose, onAddToOrder }) => {
                   <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Variants</Text>
                     <RadioButton.Group
-                      onValueChange={(value) => setSelectedVariant(item.variants.find(v => v.name === value))}
-                      value={selectedVariant ? selectedVariant.name : null}
-                    >
-                      {item.variants.map((variant, index) => (
-                        <View key={index} style={styles.variantOption}>
-                          <View style={styles.variantLabel}>
-                            <RadioButton
-                              value={variant.name}
-                              color="#1976D2"
-                              uncheckedColor="#999"
-                            />
-                            <Text style={styles.variantText}>{variant.name}</Text>
-                          </View>
-                          <Text style={[styles.variantPrice, selectedVariant === variant && styles.selectedPrice]}>
-                            SAR {variant.price}
-                          </Text>
-                        </View>
-                      ))}
-                    </RadioButton.Group>
+  onValueChange={(value) => setSelectedVariant(item.variants.find(v => v.name === value))}
+  value={selectedVariant ? selectedVariant.name : item.variants[0]?.name} // Default to the first variant
+>
+  {item.variants.map((variant, index) => (
+    <View key={index} style={styles.variantOption}>
+      <View style={styles.variantLabel}>
+        <RadioButton
+          value={variant.name}
+          color="#1976D2"
+          uncheckedColor="#999"
+        />
+        <Text style={styles.variantText}>{variant.name}</Text>
+      </View>
+      <Text style={[styles.variantPrice, selectedVariant === variant && styles.selectedPrice]}>
+        SAR {variant.price}
+      </Text>
+    </View>
+  ))}
+</RadioButton.Group>
                   </View>
                 )}
 
