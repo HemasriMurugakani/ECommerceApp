@@ -29,6 +29,14 @@ export default function CartSummaryScreen() {
 
   // Calculate total items
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  
+// Calculate the overall subtotal price for all items
+const subtotalPrice = cartItems.reduce((sum, item) => {
+  const quantityPrice = item.quantity * item.variantPrice;
+  const addOnsPrice = item.addOns.beveragesPrice + item.addOns.toppingsPrice;
+  const totalPrice = quantityPrice + addOnsPrice;
+  return sum + totalPrice;
+}, 0);
 
   return (
     <View style={styles.container}>
@@ -97,23 +105,28 @@ export default function CartSummaryScreen() {
         )}
       </ScrollView>
 
-      {/* Conditional rendering for footer */}
-      {cartItems.length > 0 && (
+ {/* Conditional rendering for footer */}
+ {cartItems.length > 0 && (
   <View style={styles.footer}>
     <TouchableOpacity
-      style={styles.fbuttonContainer}
-      onPress={() => navigation.navigate('PaymentSummary')} 
-    >
+  style={styles.fbuttonContainer}
+  onPress={() => {
+    console.log(subtotalPrice); // Log subtotalPrice here to check if it has a value
+    navigation.navigate('PaymentSummary', { subtotalPrice }); // Pass subtotalPrice
+  }}
+>
+
       <View style={styles.ftextContainer}>
         <Text style={styles.fitemsText}>Items</Text>
         <Text style={styles.fcountText}>{totalItems}</Text>
+        <Text style={styles.fcountText}>₹{subtotalPrice.toFixed(2)}</Text>
       </View>
       <Text style={styles.fbuttonText}>View payment summary</Text>
     </TouchableOpacity>
   </View>
 )}
 
-</View> 
+    </View> 
   );
 }
 const styles = StyleSheet.create({

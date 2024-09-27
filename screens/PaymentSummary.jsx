@@ -1,13 +1,27 @@
 import React from 'react';
-import { View, Text, StyleSheet, Button, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Svg, { Path } from 'react-native-svg';
+import { useRoute } from '@react-navigation/native'; // Use route to get params
+
 const PaymentSummary = () => {
+  const route = useRoute();
+  const { subtotalPrice } = route.params; // Retrieve subtotalPrice from route params
+
+  // Define constants
+  const discountRate = 0.05; // 5% discount
+  const taxRate = 0.05; // 5% tax rate
+
+  // Calculate discounts, taxable amount, total tax, and grand total
+  const discount = subtotalPrice * discountRate;
+  const taxableAmount = subtotalPrice - discount;
+  const totalTax = taxableAmount * taxRate;
+  const grandTotal = taxableAmount + totalTax;
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-      <Text style={styles.arrow}>{'<'}</Text>
         <Text style={styles.headerText}>Payment Summary</Text>
       </View>
 
@@ -16,32 +30,41 @@ const PaymentSummary = () => {
         <View style={styles.row}>
           <Text style={styles.label}>Order ID :</Text>
           <Text style={styles.value2}>12345689</Text>
-          <Icon name="calendar-today" size={20} color="#000" />
+          {/* <Icon name="calendar-today" size={20} color="#000" /> */}
           <Text style={styles.label}>Ashwin</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Sub total</Text>
-          <Text style={styles.value}>SAR 1050.00</Text>
+          <Text style={styles.value}>₹{subtotalPrice.toFixed(2)}</Text>
         </View>
         <View style={styles.row}>
-  <Text style={styles.label}>Discounts</Text>
-  <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M3 6h18M8 6V4a2 2 0 0 1 4 0v2M10 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6zm12 0v12a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V6h8z" />
-  </Svg>
-  <Text style={[styles.value, styles.discount]}>- SAR 50.00</Text>
-</View>
+          <Text style={styles.label}>Discounts</Text>
+          {/* <Svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="black"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <Path d="M3 6h18M8 6V4a2 2 0 0 1 4 0v2M10 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6zm12 0v12a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V6h8z" />
+          </Svg> */}
+          <Text style={[styles.value, styles.discount]}>- ₹{discount.toFixed(2)}</Text>
+        </View>
         <View style={styles.row}>
           <Text style={styles.label}>Taxable amount</Text>
-          <Text style={styles.value}>SAR 900.00</Text>
+          <Text style={styles.value}>₹{taxableAmount.toFixed(2)}</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Total tax</Text>
-          <Text style={styles.value}>SAR 40.00</Text>
+          <Text style={styles.value}>₹{totalTax.toFixed(2)}</Text>
         </View>
         <View style={styles.divider} />
         <View style={styles.row}>
           <Text style={styles.label}>Grand total</Text>
-          <Text style={styles.grandTotal}>SAR 940.00</Text>
+          <Text style={styles.grandTotal}>₹{grandTotal.toFixed(2)}</Text>
         </View>
       </View>
 
@@ -51,26 +74,24 @@ const PaymentSummary = () => {
           <Text style={styles.buttonText}>Add notes</Text>
         </TouchableOpacity>
         <View style={styles.actions}>
-      <TouchableOpacity style={styles.whiteButton} onPress={() => {}}>
-        <Text style={styles.blackText}>Customer</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.whiteButton} onPress={() => {}}>
-        <Text style={styles.blackText}>Coupon</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.whiteButton} onPress={() => {}}>
-        <Text style={styles.blackText}>Discount</Text>
-      </TouchableOpacity>
-    </View>
-<View style={styles.actions2}>
-<TouchableOpacity style={styles.whiteButton2} onPress={() => {}}>
-        <Text style={styles.blackText2}>Print Bill</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.whiteButton3} onPress={() => {}}>
-        <Text style={styles.blackText3}>Proceed Payment</Text>
-      </TouchableOpacity>
-</View>
+          <TouchableOpacity style={styles.whiteButton} onPress={() => {}}>
+            <Text style={styles.blackText}>Customer</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.whiteButton} onPress={() => {}}>
+            <Text style={styles.blackText}>Coupon</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.whiteButton} onPress={() => {}}>
+            <Text style={styles.blackText}>Discount</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.actions2}>
+          <TouchableOpacity style={styles.whiteButton2} onPress={() => {}}>
+            <Text style={styles.blackText2}>Print Bill</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.whiteButton3} onPress={() => {}}>
+            <Text style={styles.blackText3}>Proceed Payment</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );

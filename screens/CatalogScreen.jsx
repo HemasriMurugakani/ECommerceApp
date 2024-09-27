@@ -1,17 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, FlatList, ScrollView, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import BottomSheet from '../components/bottomsheet';
 import { useNavigation } from '@react-navigation/native';
-import jsondata from './data.json';
+// import jsondata from './data.json';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCatalogItems } from '../redux/catalogSlice'; // Adjust path as necessary
 
 const CatalogScreen = () => {
   const navigation = useNavigation();
-  const [items] = useState(jsondata.items);
+
+  const dispatch = useDispatch();
+  
+  const { items, status, error } = useSelector((state) => state.catalog);
+
+  // const [items, setItems] = useState([]);
+  // const [items] = useState(jsondata.items);
   const [activeFilter, setActiveFilter] = useState('All');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [cartItems, setCartItems] = useState([]);
+
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchCatalogItems());
+    }
+  }, [status, dispatch]);
+
+  // useEffect(() => {
+  //   const fetchItems = async () => {
+  //     try {
+  //       const response = await fetch('https://dummyjson.com/c/74f2-c4c9-4651-aae9');
+  //       const data = await response.json();
+  //       setItems(data.items); 
+  //     } catch (error) {
+  //       console.error('Error fetching data:', error);
+  //     }
+  //   };
+  //   fetchItems();
+  // }, []);
 
   const handleAddToOrder = (item) => {
     setCartItems(prevItems => [...prevItems, item]);
